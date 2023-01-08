@@ -6,7 +6,7 @@ from math import *
 
 # Init Constante
 PI = 4*atan(1.)
-J = 15             # Level of the Dyadic decomposition
+J = 7             # Level of the Dyadic decomposition
 N = 6             # Nb vanishing moment ( Db{N/2} )
 M = 2**J          # Number of point on curves
 K = N + 2**J      # Size of the matricies
@@ -96,24 +96,29 @@ def main():
     B[K-1] = 0.
 
     #print("Tdiff : \n", abs(Ttest-T))
+    #print("T1 : \n", T[0][:10])
+    #print("TK-1 : \n", T[K-1][K-10:])
+
     print("T : \n", T)
-    print("T1 : \n", T[0][:10])
-    print("TK-1 : \n", T[K-1][K-10:])
     print("B : \n", B)
     
     
     C = np.linalg.solve(T, B)
-    #C = [-0.9972, -0.8776, 0.1279, 1.0870, 0.2479, -0.5059]
+    C_corrected = C[4:-1]
+
     C_ex = pywt.wavedec(Sol_E, 'db3', level=0)
+
     Ca_ex = C_ex[0]
     print("Il y en a : ", len(C))
     print("On trouve les coefficients :", C)
-    #print("On devrais avoir :", len(Ca_ex)," coefficients")
+    print("Il y en a : ", len(C_corrected))
+    print("On trouve les coefficients :", C_corrected)
     print("On devrais avoir : ", len(Ca_ex), "coefficients")
     print("On devrais avoir :", Ca_ex)
     
     # Recreate the signal from the coefficients
     Sol_WGM = pywt.upcoef("a", C, 'db3', level=1)
+    Sol_WGM_corrected = pywt.upcoef("a", C_corrected, 'db3', level=1)
     Sol_E_approx = pywt.upcoef("a", Ca_ex, 'db3', level=1)
     #print("On trouve la solution :", Sol_WGM)
 
@@ -122,7 +127,7 @@ def main():
     f = plt.figure()
     axe = f.add_axes([0.1, 0.1, 0.8, 0.8])
     plt.title("Cas test 1 : N="+str(N)+" et J="+str(J))
-    print(f"taille : \n  Sol_E : {len(Sol_E)} \n Sol_E_approx : {len(Sol_E_approx)} \n Sol_WGM : {len(Sol_WGM)}")
+    print(f"taille : \n  Sol_E : {len(Sol_E)} \n Sol_E_approx : {len(Sol_E_approx)} \n Sol_WGM : {len(Sol_WGM)}\n Sol_WGM_corrected : {len(Sol_WGM_corrected)}")
 
     axe.plot(X, Sol_E, label="Solution exact")
 
@@ -131,8 +136,12 @@ def main():
 
     X_WGM = np.linspace(0, 1, len(Sol_WGM))
     axe.plot(X_WGM, Sol_WGM, label="Solution WGM")
+
+    X_WGM_corr = np.linspace(0, 1, len(Sol_WGM_corrected))
+    axe.plot(X_WGM_corr, Sol_WGM_corrected, label="Solution WGM corrected")
+
     axe.set_xlim([0,1])
-    axe.set_ylim([-2, 2])
+    axe.set_ylim([-1.1, 1.1])
     axe.legend()
     plt.show()
     
